@@ -59,15 +59,13 @@ class UserView(View):
         json_obj = json.loads(json_string)
         username = json_obj.get('username')
         email = json_obj.get('email')
-        phone = json_obj.get('phone')
-        sms_num = json_obj.get('sms_num')
-        password1 = json_obj.get('password_1')
-        password2 = json_obj.get('password_2')
+        password1 = json_obj.get('password')
+        password2 = json_obj.get('password2')
 
         # 参数检查
         if not json_string:
             return JsonResponse({'code': 202, 'error': '请求中无内容'})
-        cache_key = 'sms_%s' % phone
+        # cache_key = 'sms_%s' % phone
         # if not cache.get(cache_key):
         #     return JsonResponse({'code': 201, 'error': '验证码已过期'})
         # if not cache.get(cache_key) == int(sms_num):
@@ -94,7 +92,7 @@ class UserView(View):
         password = p_m.hexdigest()
 
         UserProfile.objects.create(username=username, nickname=username, email=email,
-                                   phone=phone, password=password, sign=default_sign, info=default_info)
+                                   password=password, sign=default_sign, info=default_info)
 
         return JsonResponse({'code': 200, 'username': username, 'data': ''})
 
