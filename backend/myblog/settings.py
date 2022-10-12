@@ -177,3 +177,11 @@ CACHES = {
 # jwt令牌的密钥和储存时间
 JWT_KEY = 'xxxxxx'
 JWT_EXPIRE = 3600
+
+
+# 邮件的相关配置
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.qq.com'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = '3555970235@qq.com'
+EMAIL_HOST_PASSWORD = 'wewkbqwquhgzdabc'  # 授权码

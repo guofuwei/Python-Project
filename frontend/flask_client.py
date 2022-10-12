@@ -76,6 +76,12 @@ def test_api():
     return send_file('templates/test_api.html')
 
 
+@app.route('/test')
+def test():
+    # 测试
+    return send_file('templates/test.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True)
 
