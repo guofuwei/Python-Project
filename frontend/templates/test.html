@@ -7,279 +7,60 @@
 </head>
 <body>
   <div id="app">
-    <div class="loginbody">
-        <div class="logindata">
-          <div class="logintext">
-            <h2>修改个人信息</h2>
-          </div>
-          <div class="formdata">
-            <el-form ref="form"
-                     :model="form"
-                     :rules="rules">
-              <el-form-item>
-                <el-col :span="8" style="margin-left:30px;">
-                  <el-avatar shape="square" :size="100" :fit="fit" :src="url"></el-avatar>
-                </el-col>
-                <el-col :span="26">
-                  <el-upload
-                  class="upload-demo"
-                  ref="upload"
-                  :action="action_url"
-                  :on-preview="handlePreview"
-                  :on-remove="handleRemove"
-                  :file-list="fileList"
-                  :auto-upload="false"
-                  name="avatar"
-                  :headers="action_header"
-                  >
-                  <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-                  <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-                  <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
-                  </el-upload>
-                </el-col>
-              </el-form-item>
-              <el-form-item prop="nickname">
-                <el-col :span="4" class="loginitem">
-                  昵称
-                </el-col>
-                <el-col :span="20">
-                  <el-input v-model="form.nickname"></el-input>
-                </el-col>
-              </el-form-item>
-              <el-form-item prop="sign">
-                <el-col :span="4" class="loginitem">
-                  个性签名
-                </el-col>
-                <el-col :span="20">
-                  <el-input v-model="form.sign"></el-input>
-                </el-col>
-              </el-form-item>
-              <el-form-item>
-                <el-col :span='4' class="loginitem">
-                  个人描述
-                </el-col>
-                <el-col :span="20">
-                  <el-input
-                  :autosize="{ minRows: 3, maxRows: 10}"
-                  type="textarea"
-                  v-model="form.info">
-                  placeholder="请输入内容"
-                 </el-input>
-                </el-col>
-              </el-form-item>
-            </el-form>
-          </div>
-          <div class="butt">
-            <el-button class="shou" 
-            @click.native.prevent="register('form')">注册并登陆</el-button>
-          </div>
-        </div>
-      </div>
+    <el-form ref="form" :model="form" label-width="80px">
+      <el-form-item>
+        <h2>发表新文章</h2>
+      </el-form-item>
+      <el-form-item label="标题">
+        <el-input v-model="form.name"></el-input>
+      </el-form-item>
+      <el-form-item label="活动区域">
+        <el-select v-model="form.region" placeholder="请选择活动区域">
+          <el-option label="区域一" value="shanghai"></el-option>
+          <el-option label="区域二" value="beijing"></el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="特殊资源">
+        <el-radio-group v-model="form.resource">
+          <el-radio label="线上品牌商赞助"></el-radio>
+          <el-radio label="线下场地免费"></el-radio>
+        </el-radio-group>
+      </el-form-item>
+      <el-form-item>
+        <el-button type="primary" @click="onSubmit">立即创建</el-button>
+        <el-button>取消</el-button>
+      </el-form-item>
+    </el-form>
   </div>
 </body>
+
+
 <!-- import Vue before Element -->
 <script src="https://unpkg.com/vue@2/dist/vue.js"></script>
 <!-- import JavaScript -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="http://cdn.suoluomei.com/common/js2.0/axios/axios.min.js"></script>
 <script>
-  new Vue(
-    {
-      el: '#app',
-      data() {
-        return {
-          token:'',
-          username:'',
-          fit: 'fill',
-          url: 'https://fuss10.elemecdn.com/e/5d/4a731a90594a4af544c0c25941171jpeg.jpeg',
-          action_url:'',
-          action_header:{},
-          fileList:[],
-          form: {
-            nickname: '',
-            sign:'',
-            info: '',
-          },
-          rules: {
-            nickname: [
-              { required: true, message: '昵称不能为空', trigger: 'blur' },
-              { min: 3,max:15, message: "长度在3到15个字符之间",trigger: 'blur' },
-            ],
-            sign: [
-              { required: true, message: '个性签名不能为空', trigger: 'blur' },
-              { min: 6,max:30, message: "长度在6到30个字符之间",trigger: 'blur' },
-            ],
-            info:[
-              { required: true, message: '个人描述不能为空', trigger: 'blur' },
-              { min: 6,max:300, message: "长度在6到300个字符之间",trigger: 'blur' },
-            ],
-          },
+  new Vue ({
+    el: '#app',
+    data() {
+      return {
+        form: {
+          name: '',
+          region: '',
+          date1: '',
+          date2: '',
+          delivery: false,
+          type: [],
+          resource: '',
+          desc: ''
         }
-      },
-      mounted() {
-        this.token = window.localStorage.getItem('myblog_token');
-        this.username = window.localStorage.getItem('myblog_user');
-        this.action_url='http://127.0.0.1:8000/v1/users/'+this.username+'/avatar'
-        this.action_header={
-          'Authorization': this.token //设置token 其中K名要和后端协调好
-        };
-        axios({
-          method:'get',
-          url:"http://127.0.0.1:8000/v1/users/"+ this.username,
-          headers: {
-            'Authorization': this.token //设置token 其中K名要和后端协调好
-          },
-       }).then((response)=>{
-        if (response.data.code == 200){
-          this.$message({
-            message: '修改成功,即将跳转登陆页面',
-            type: 'success',
-            duration:1500,
-            onClose:function(){          
-              window.localStorage.removeItem('myblog_token');
-              window.localStorage.removeItem('myblog_user');
-              window.location.href='/login';
-            }
-          })
-        }else{
-          this.$message({
-            message: '修改失败',
-            type: 'warning',
-            duration:1500,
-          })
-        }
-       })
-      },
-      methods: {
-        submitUpload(){
-          console.log(this.token);
-          console.log(this.username);
-          console.log(this.fileList);
-          console.log(this.action_url)
-          this.$refs.upload.submit();
-        },
-        handleRemove(file, fileList) {
-          console.log(file, fileList);
-        },
-        handlePreview(file) {
-          console.log(file);
-        },
-        handleExceed(files, fileList) {
-          console.log(file);
-        },
-        beforeRemove(file, fileList) {
-          return this.$confirm(`确定移除 ${ file.name }？`);
-        },
-        register(form) {
-          this.$refs[form].validate((valid) => {
-            if (valid) {
-              axios
-              .post('http://127.0.0.1:8000/v1/users', this.form)
-              .then((res) => {
-                // 登录成功
-                // 拿到token
-                console.log(res);
-                if(res.data.code==200){
-                  this.$message({
-                    message:"注册成功,即将跳转登陆页面",
-                    type:'success',
-                    duration:1500,
-                    onClose:function(){window.location.href='/login';}
-                  })
-                }
-                else{
-                  this.$message({
-                    message:res.data.error,
-                    type:"warning",
-                  });
-                }
-              })
-              .catch((err) => {
-                console.error(err);
-              });
-            }else {
-              return false
-            }
-          })
-        },
-      },
+      }
+    },
+    methods: {
+      onSubmit() {
+        console.log('submit!');
+      }
     }
-)
-        
-  </script>
-</html>
-
-
-
- 
-<style scoped>
-    .loginbody {
-      width: 100%;
-      height: 100%;
-      min-width: 1000px;
-      background-image: url('/static/assets/index.png');
-      background-size: 100% 100%;
-      background-position: center center;
-      overflow: auto;
-      background-repeat: no-repeat;
-      position: fixed;
-      line-height: 100%;
-      padding-top: 30px;
-    }
-    
-    .logintext {
-      margin-bottom: 20px;
-      line-height: 50px;
-      text-align: center;
-      font-size: 30px;
-      font-weight: bolder;
-      color: white;
-      text-shadow: 2px 2px 4px #000000;
-    }
-
-    .loginitem
-    {
-      text-align: center;
-      font-size: 15px;
-      font-weight: bolder;
-      color: black;
-    }
-    
-    .logindata {
-      width: 400px;
-      height: 300px;
-      transform: translate(-50%);
-      margin-left: 50%;
-    }
-    
-    .tool {
-      display: flex;
-      justify-content: space-between;
-      color: #606266;
-    }
-    
-    .butt {
-      margin-top: 10px;
-      text-align: center;
-    }
-    
-    .shou {
-      cursor: pointer;
-      color: #606266;
-    }
-    
-    /*ui*/
-    /* /deep/ .el-form-item__label {
-      font-weight: bolder;
-      font-size: 15px;
-      text-align: left;
-    }
-    
-    /deep/ .el-button {
-      width: 100%;
-      margin-bottom: 10px;
-    
-    } */
-    </style>
-    
-    
+  })
+</script>

@@ -102,11 +102,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
                   var content = editor.txt.html()
                   var content_text = editor.txt.text()
                   var title = $('.comment_input').val()
-		  var title_after = $('#help_js').text(title).html()
-		 // console.log('111111')
-		 // console.log(title)
-		 // console.log(title_after)
-		 // console.log('111111')
+		              var title_after = $('#help_js').text(title).html()
                   var limit = $("input[name='limit']:checked").val()
                   var category = $("input[name='category']:checked").val()
                   var post_data = {'content': content, 'content_text':content_text,'limit': limit, 'title':title, 'category':category}

@@ -1,3 +1,4 @@
+import email
 from django.shortcuts import render
 from django.views import View
 import json
@@ -55,6 +56,44 @@ def update_password_view(request, username):
     return JsonResponse({'code': 200, 'error': ''})
 
 
+def forget_password_view(request):
+    if request.method != 'POST':
+        return JsonResponse({'code': 10109, 'error': '非法请求'})
+    json_str = request.body
+    json_obj = json.loads(json_str)
+    if not json_str:
+        return JsonResponse({'code': 202, 'error': '请求中无内容'})
+    email = json_obj.get('email')
+    email_code = json_obj.get('email_code')
+    password_new = json_obj.get('password_new1')
+    password_new2 = json_obj.get('password_new2')
+    cache_key = 'email_code_%s' % email
+    cache_code = cache.get(cache_key)
+    try:
+        int_email = int(email_code)
+    except:
+        return JsonResponse({'code': 208, 'error': '验证码不正确'})
+    if not cache_code:
+        return JsonResponse({'code': 201, 'error': '验证码已过期'})
+    if not cache_code == int_email:
+        return JsonResponse({'code': 208, 'error': '验证码不正确'})
+    if not password_new or not password_new2:
+        return JsonResponse({'code': 10101, 'error': '新密码不能为空'})
+    if password_new != password_new2:
+        return JsonResponse({'code': 206, 'error': '两次提交的密码不一致'})
+    try:
+        user = UserProfile.objects.get(email=email)
+    except:
+        return JsonResponse({'code': 207, 'error': '该用户不存在'})
+    # 对密码进行加密
+    p_m = hashlib.md5()
+    p_m.update(password_new.encode('utf-8'))
+    # 保存新密码
+    user.password = password_new
+    user.save()
+    return JsonResponse({'code': 200, 'error': ''})
+
+
 def sendSMS_view(request):
     # 获取手机号和生成验证码
     code = random.randint(100000, 999999)
@@ -92,7 +131,7 @@ def sendmail_view(request):
         return JsonResponse({'code': 10101, 'error': '邮箱不能为空'})
 
     # 储存验证码
-    cache_key = 'register_email_%s' % email
+    cache_key = 'email_code_%s' % email
     # old_key = cache.get(cache_key)
     # if old_key:
     #     return JsonResponse({'code': 10100, 'error': '邮件已发送，请勿重复点击'})
@@ -115,7 +154,7 @@ class UserView(View):
         password2 = json_obj.get('password2')
 
         # 参数检查
-        cache_key = 'register_email_%s' % email
+        cache_key = 'email_code_%s' % email
         cache_code = cache.get(cache_key)
         try:
             int_email = int(email_code)
@@ -138,8 +177,13 @@ class UserView(View):
         if password1 != password2:
             return JsonResponse({'code': 206, 'error': '两次提交的密码不一致'})
         try:
+            UserProfile.objects.get(email=email)
+            return JsonResponse({'code': 207, 'error': '该邮箱已注册'})
+        except:
+            pass
+        try:
             UserProfile.objects.get(username=username)
-            return JsonResponse({'code': 207, 'error': '用户名已存在'})
+            return JsonResponse({'code': 207, 'error': '该账户已注册'})
         except:
             pass
 
@@ -150,7 +194,6 @@ class UserView(View):
 
         UserProfile.objects.create(username=username, nickname=username, email=email,
                                    password=password, sign=default_sign, info=default_info)
-
         return JsonResponse({'code': 200, 'username': username, 'data': ''})
 
     @method_decorator(login_check_dec)
