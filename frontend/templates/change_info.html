@@ -82,6 +82,7 @@
 <!-- import JavaScript -->
 <script src="https://unpkg.com/element-ui/lib/index.js"></script>
 <script src="http://cdn.suoluomei.com/common/js2.0/axios/axios.min.js"></script>
+<script type="text/javascript" src="/static/config/config.js"></script>
 <script>
   new Vue(
     {
@@ -119,20 +120,20 @@
       mounted() {
         this.token = window.localStorage.getItem('myblog_token');
         this.username = window.localStorage.getItem('myblog_user');
-        this.action_url='http://127.0.0.1:8000/v1/users/'+this.username+'/avatar'
+        this.action_url=config.backend_url+'/v1/users/'+this.username+'/avatar'
         this.action_header={
           'Authorization': this.token //设置token 其中K名要和后端协调好
         };
         axios({
           method:'get',
-          url:"http://127.0.0.1:8000/v1/users/"+ this.username,
+          url:config.backend_url+"/v1/users/"+ this.username,
           headers: {
             'Authorization': this.token //设置token 其中K名要和后端协调好
           },
        }).then((response)=>{
         if (response.data.code == 200){
           console.log(response)
-          this.url='http://127.0.0.1:8000/media/'+ response.data.data.avatar;
+          this.url=config.backend_url+'/media/'+ response.data.data.avatar;
           this.form.nickname=response.data.data.nickname
           this.form.info=response.data.data.info
           this.form.sign=response.data.data.sign
@@ -178,7 +179,7 @@
             if (valid) {
               axios({
                 method:'put',
-                url:"http://127.0.0.1:8000/v1/users/" + this.username,
+                url:config.backend_url+"/v1/users/" + this.username,
                 headers: {
                   'Content-Type': 'application/json',//设置请求头请求格式为JSON
                   'Authorization': this.token //设置token 其中K名要和后端协调好

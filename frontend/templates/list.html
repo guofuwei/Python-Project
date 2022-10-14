@@ -16,6 +16,8 @@ A ny individuals and organizations and not for commercial use, professiona websi
   <script src="/static/js/jquery.easyfader.min.js"></script>
   <script src="/static/js/scrollReveal.js"></script>
   <script src="/static/js/common.js"></script>
+<script type="text/javascript" src="/static/config/config.js"></script>
+
 </head>
 
 <body>
@@ -37,9 +39,9 @@ A ny individuals and organizations and not for commercial use, professiona websi
     var blog_username = arrUrl[1].split('/')[1];
 
     if(query_set){
-        var get_url = "http://127.0.0.1:8000/v1/topics/"+ blog_username + "?" + query_set;
+        var get_url = config.backend_url+"/v1/topics/"+ blog_username + "?" + query_set;
     }else{
-        var get_url = "http://127.0.0.1:8000/v1/topics/"+ blog_username;
+        var get_url = config.backend_url+"/v1/topics/"+ blog_username;
 
     }
 
@@ -128,7 +130,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
                 //添加编辑事件
                 $('.edit').on('click',function(){
                     var edit_id = $(this).attr('data');
-                    var edit_url = "http://127.0.0.1:8000/v1/topics/"+ blog_username + "?" + 't_id=' + edit_id;
+                    var edit_url = config.backend_url+"/v1/topics/"+ blog_username + "?" + 't_id=' + edit_id;
                     $.ajax({
                         // 请求方式
                         type:"post",
@@ -155,7 +157,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
                 //添加删除事件
                 $('.delete').on('click', function(){
                     var delete_id = $(this).attr('data');
-                    var delete_url = "http://127.0.0.1:8000/v1/topics/"+ blog_username + "?" + 't_id=' + delete_id;
+                    var delete_url = config.backend_url+"/v1/topics/"+ blog_username + "?" + 't_id=' + delete_id;
                     $.ajax({
                         // 请求方式
                         type:"delete",

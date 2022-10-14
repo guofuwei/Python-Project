@@ -139,7 +139,7 @@
         },
         getcode(){
           axios
-          .post('http://127.0.0.1:8000/v1/users/emailcode', this.form)
+          .post(config.backend_url+'/v1/users/emailcode', this.form)
           .then((res) => {
             this.$message({
               message:"发送成功",
@@ -155,7 +155,7 @@
           this.$refs[form].validate((valid) => {
             if (valid) {
               axios
-              .post('http://127.0.0.1:8000/v1/users', this.form)
+              .post(config.backend_url+'/v1/users', this.form)
               .then((res) => {
                 // 登录成功
                 // 拿到token

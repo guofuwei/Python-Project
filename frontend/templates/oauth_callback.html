@@ -6,6 +6,8 @@
 </head>
 <body>
     <script src="/static/js/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/config/config.js"></script>
+
     <script>
         function getQueryVariable(variable)
         {
@@ -27,7 +29,7 @@
             // dataType
             dataType:"json",
             // url
-            url:"http://127.0.0.1:8000/v1/users/weibo/token?code="+code,
+            url:config.backend_url+"/v1/users/weibo/token?code="+code,
             // result 为请求的返回结果对象
             success:function (result) {
                 console.log(result)

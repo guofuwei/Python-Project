@@ -1,0 +1,43 @@
+version: "3"
+services:
+
+  db:
+    image: mysql
+    container_name: db
+    volumes:
+      - myblog-data:/var/lib/mysql
+    networks:
+      - myblog-net
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=somepassword
+      - MYSQL_DATABASE=myblog
+      - MYSQL_USER=myblog
+      - MYSQL_PASSWORD=123456
+
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    depends_on:
+      - backend
+    networks:
+      - myblog-net
+    ports:
+      - 10000:80
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+
+  backend:
+    build: ./backend
+    container_name: backend
+    depends_on:
+      - db
+    networks:
+      - myblog-net
+    command: bash -c "sleep 3 && python manage.py migrate\
+            && python manage.py runserver 0.0.0.0:8000"
+
+volumes:
+  myblog-data:
+networks:
+  myblog-net:

@@ -50,7 +50,8 @@ def update_password_view(request, username):
      # 对密码进行加密
     p_m = hashlib.md5()
     p_m.update(password_new.encode('utf-8'))
-    myuser.password = p_m.hexdigest()
+    password = p_m.hexdigest()
+    myuser.password = password
     # 保存新密码
     myuser.save()
     return JsonResponse({'code': 200, 'error': ''})
@@ -88,8 +89,9 @@ def forget_password_view(request):
     # 对密码进行加密
     p_m = hashlib.md5()
     p_m.update(password_new.encode('utf-8'))
+    password = p_m.hexdigest()
     # 保存新密码
-    user.password = password_new
+    user.password = password
     user.save()
     return JsonResponse({'code': 200, 'error': ''})
 

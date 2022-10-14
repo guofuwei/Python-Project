@@ -16,6 +16,8 @@ A ny individuals and organizations and not for commercial use, professiona websi
 	<script src="/static/js/jquery.min.js" type="text/javascript"></script>
 	<script src="/static/js/jquery.easyfader.min.js"></script>
 	<script src="/static/js/wangEditor.js"></script>
+<script type="text/javascript" src="/static/config/config.js"></script>
+
 	<!--[if lt IE 9]>
 	<script src="js/modernizr.js"></script>
 	<![endif]-->
@@ -35,7 +37,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
       // 请求方式
       type:"get",
       // url
-      url:"http://127.0.0.1:8000/v1/users/"+ username,
+      url:config.backend_url+"/v1/users/"+ username,
       async: false,
       beforeSend: function(request) {
           request.setRequestHeader("Authorization", token);
@@ -119,7 +121,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
                   // dataType
                   dataType:"json",
                   // url
-                  url:"http://127.0.0.1:8000/v1/topics/" + username,
+                  url:config.backend_url+"/v1/topics/" + username,
                   //url:"http://127.0.0.1:7000/v1/topics/" + username,
                   // 把JS的对象或数组序列化一个json 字符串
                   data:JSON.stringify(post_data),

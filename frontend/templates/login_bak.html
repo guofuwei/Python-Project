@@ -10,6 +10,8 @@ A ny individuals and organizations and not for commercial use, professiona websi
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="/static/css/login_reglogin.css"/>
     <script src="/static/js/jquery.min.js" type="text/javascript"></script>
+<script type="text/javascript" src="/static/config/config.js"></script>
+
         <title>登陆</title>
 </head>
 <body>
@@ -42,7 +44,7 @@ A ny individuals and organizations and not for commercial use, professiona websi
 			contentType:'application/json',
 			dataType:'json',
 			data:JSON.stringify(post_data),
-			url:'http://127.0.0.1:8000/v1/tokens',	
+			url:config.backend_url+'/v1/tokens',	
 			success: function(result){
 				if (result.code==200){
 					window.localStorage.setItem('myblog_token',result.data.token);
