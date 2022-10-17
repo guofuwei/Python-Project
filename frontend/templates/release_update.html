@@ -1,152 +1,278 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-<!--
-author:guojunyu
-desc:this demo is about blog. PLEASE NOTE:If you have trouble running it ,try any of the other demos or connect with auther.
-A ny individuals and organizations and not for commercial use, professiona website for customized web site.
--->
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="shortcut icon" href="/static/images/bitbug_favicon.ico" type="image/x-icon" />
-	<link href="/static/css/base.css" rel="stylesheet">
-	<link href="/static/css/index.css" rel="stylesheet">
-	<link rel="stylesheet" href="/static/css/comments.css">
-	<link href="/static/css/m.css" rel="stylesheet">
-	<script src="/static/js/jquery.min.js" type="text/javascript"></script>
-	<script src="/static/js/jquery.easyfader.min.js"></script>
-	<script src="/static/js/wangEditor.js"></script>
-<script type="text/javascript" src="/static/config/config.js"></script>
 
-	<!--[if lt IE 9]>
-	<script src="js/modernizr.js"></script>
-	<![endif]-->
-    <script src="/static/js/common.js"></script>
-    <script src="/static/js/scrollReveal.js"></script>
+<head>
+  <meta charset="UTF-8">
+  <!-- import CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
 </head>
 
 <body>
+  <div id="app">
+    <div class="loginbody">
+      <div class="logindata">
+        <div class="logintext">
+          <h2>编辑文章内容</h2>
+        </div>
+        <div class="formdata">
+          <el-form ref="form" :model="form" :rules="rules">
+            <el-form-item prop="title">
+              <el-col :span="4" class="loginitem">
+                文章标题
+              </el-col>
+              <el-col :span="20">
+                <el-input v-model="form.title"></el-input>
+              </el-col>
+            </el-form-item>
+            <el-form-item prop="limit">
+              <el-radio-group v-model="form.limit">
+                <el-radio-button label="公开博客"></el-radio-button>
+                <el-radio-button label="个人博客"></el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item prop="category">
+              <el-radio-group v-model="form.category">
+                <el-radio-button label="技术类"></el-radio-button>
+                <el-radio-button label="非技术类"></el-radio-button>
+              </el-radio-group>
+            </el-form-item>
+            <el-form-item>
+            </el-form-item>
+          </el-form>
+        </div>
+      </div>
+      <div class="content-class">
+        <el-col :span='2' class="loginitem">
+          文章内容
+        </el-col>
+        <el-col :span="22">
+          <el-input :autosize="{ minRows: 7, maxRows: 10}" type="textarea" v-model="form.content">
+            placeholder="请输入内容"
+          </el-input>
+        </el-col>
+        <div class="butt">
+          <el-button class="shou" @click.native.prevent="submit('form')">确认并修改</el-button>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
-
-  <script>
-      token = window.localStorage.getItem('myblog_token');
-      //登陆的用户名
-      username = window.localStorage.getItem('myblog_user');
-      var html_body = ''
-      $.ajax({
-      // 请求方式
-      type:"get",
-      // url
-      url:config.backend_url+"/v1/users/"+ username,
-      async: false,
-      beforeSend: function(request) {
-          request.setRequestHeader("Authorization", token);
+<!-- import Vue before Element -->
+<script src="https://unpkg.com/vue@2/dist/vue.js"></script>
+<!-- import JavaScript -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="http://cdn.suoluomei.com/common/js2.0/axios/axios.min.js"></script>
+<script type="text/javascript" src="/static/config/config.js"></script>
+<script>
+  new Vue(
+    {
+      el: '#app',
+      data() {
+        return {
+          token: '',
+          username: '',
+          form: {
+            t_id: '',
+            content: '',
+            limit: '',
+            title: '',
+            category: ''
+          },
+          rules: {
+            content: [
+              { required: true, message: '文章内容不能为空', trigger: 'blur' },
+            ],
+            limit: [
+              { required: true, message: '文章类型不能为空', trigger: 'blur' },
+            ],
+            title: [
+              { required: true, message: '文章标题不能为空', trigger: 'blur' },
+            ],
+            category: [
+              { required: true, message: '文章类别不能为空', trigger: 'blur' },
+            ],
+          },
+        }
       },
-      success:function (result) {
-          if (200 == result.code){
-              //alert("请求成功")
-              //console.log(result)
-              $(document).attr('title', '发表博客-'+ result.data.nickname+'的博客');
-              //登陆和访问用户相等
-              header_html = makeHeader(username, username)
-              html_body += header_html
-              html_body += '<div class="container">'
-              html_body += '<div class="pagebg re"></div>'
-              html_body += '<div class="container">'
-              html_body += '<h1 class="t_nav"><span>不要轻易放弃。学习成长的路上，我们长路漫漫，只因学无止境。 </span>'
-
-              html_body += '<p class="n1">发表博客</p>'
-              html_body += '</h1>'
-              html_body += '<div class="infosbox">'
-              html_body += '<br>'
-              html_body += '<p>'
-              html_body += '<input class="comment_input" id="author" maxlength="50" name="author" required="required" size="25" tabindex="1" type="text">'
-              html_body += '<label for="author">文章标题</label>'
-              html_body += '</p>'
-              html_body += '<br>'
-              html_body += '<p class="classification">'
-              html_body += '<input name="limit" type="radio" value="public" checked=check >公开博客'
-              html_body += '<input name="limit" type="radio" value="private" >个人博客'
-              html_body += '</p>'
-              html_body += '<br>'
-              html_body += '<p class="classification">'
-              html_body += '<input name="category" type="radio" value="tec" checked=check>技术类'
-              html_body += '<input name="category" type="radio" value="no-tec">非技术类'
-              html_body += '</p>'
-              html_body += '<br>'
-
-              html_body += '<form>'
-
-              html_body += '<div id="editor" style="margin-left: 12px;margin-right: 12px"></div>'
-              html_body += '<br>'
-              html_body += '<p>'
-              html_body += '<input id="id_article" name="article" type="hidden" value="1">'
-              html_body += '<input name="button" type="button" id="button" tabindex="5" value="提交" class="button" />'
-              html_body += '</p>'
-              html_body += '</form>'
-              html_body += '<br>'
-              html_body += '</div>'
-              html_body += '<div id="help_js" style="display:none"></div>'
-              html_body += '<footer id="footer">'
-              html_body += '<p>Design by <a href=# target="_blank">'
-              html_body += result.data.nickname
-              html_body += '</a>'
-              html_body += '</footer>'
-              $('body').html(html_body)
-              //初始化登出
-              loginOut()
-              var E = window.wangEditor
-              editor = new E('#editor')
-              // 或者 var editor = new E( document.getElementById('editor') )
-              editor.create()
-              $('#button').on('click', function(){
-
-                  var content = editor.txt.html()
-                  var content_text = editor.txt.text()
-                  var title = $('.comment_input').val()
-		  var title_after = $('#help_js').text(title).html()
-		 // console.log('111111')
-		 // console.log(title)
-		 // console.log(title_after)
-		 // console.log('111111')
-                  var limit = $("input[name='limit']:checked").val()
-                  var category = $("input[name='category']:checked").val()
-                  var post_data = {'content': content, 'content_text':content_text,'limit': limit, 'title':title, 'category':category}
-
-                  $.ajax({
-                  // 请求方式
-                  type:"post",
-                  // contentType 
-                  contentType:"application/json",
-                  // dataType
-                  dataType:"json",
-                  // url
-                  url:config.backend_url+"/v1/topics/" + username,
-                  //url:"http://127.0.0.1:7000/v1/topics/" + username,
-                  // 把JS的对象或数组序列化一个json 字符串
-                  data:JSON.stringify(post_data),
-                  // result 为请求的返回结果对象
-                  beforeSend: function(request) {
-                    request.setRequestHeader("Authorization", token);
-                  },
-                  success:function (result) {
-                      if (200 == result.code){
-                          alert("发布成功")
-                          window.location.href = '/' + username + '/topics'
-                      }else{
-                          alert(result.error)
-                      }
-                   }
-                 })
+      mounted() {
+        this.token = window.localStorage.getItem('myblog_token');
+        this.username = window.localStorage.getItem('myblog_user');
+        var url = document.location.toString();
+        var arrUrl = url.split("//");
+        this.form.t_id = arrUrl[1].split('/')[4];
+        axios({
+          method: 'get',
+          url: config.backend_url + "/v1/topics/" + this.username + "?" + 't_id=' + this.form.t_id,
+          headers: {
+            'Authorization': this.token //设置token 其中K名要和后端协调好
+          },
+        }).then((response) => {
+          if (response.data.code == 200) {
+            console.log(response)
+            if (response.data.data.limit == 'public') {
+              this.form.limit = '公开博客'
+            } else {
+              this.form.limit = '个人博客'
+            }
+            if (response.data.data.category == 'tec') {
+              this.form.category = '技术类'
+            } else {
+              this.form.category = '非技术类'
+            }
+            this.form.content = response.data.data.content
+            this.form.title = response.data.data.title
+          } else {
+            this.$message({
+              message: '未登陆！即将跳转登陆界面',
+              type: 'warning',
+              duration: 1500,
+              onClose: function () {
+                window.location.href = '/login';
+              }
             })
-
-          }else{
-            alert(result.error)
-            window.location.href='/login'
           }
-       }
-    });
+        })
+      },
+      methods: {
+        submit(form) {
+          this.$confirm('此操作将修改文章信息, 是否继续?', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning'
+          }).then(() => {
+            this.submit_in(form);
+          })
+        },
+        submit_in(form) {
+          this.$refs[form].validate((valid) => {
+            if (valid) {
+              var form_post = this.form
+              if (this.form.limit == '公开博客') {
+                form_post.limit = 'public'
+              } else {
+                form_post.limit = 'private'
+              }
+              if (this.form.category == '技术类') {
+                form_post.category = 'tec'
+              } else {
+                form_post.category = 'no-tec'
+              }
+              console.log(form_post)
+              axios({
+                method: 'put',
+                url: config.backend_url + "/v1/topics/" + this.username,
+                headers: {
+                  'Content-Type': 'application/json',//设置请求头请求格式为JSON
+                  'Authorization': this.token //设置token 其中K名要和后端协调好
+                },
+                params: {},
+                data: form_post
+              }).then((response) => {
+                if (response.data.code == 200) {
+                  this.$message({
+                    message: '修改成功,页面即将刷新',
+                    type: 'success',
+                    duration: 2000,
+                    onClose: function () {
+                      window.location.reload();
+                    }
+                  })
+                } else {
+                  this.$message({
+                    message: '修改失败',
+                    type: 'warning',
+                    duration: 1500,
+                  })
+                }
+              })
+            }
+            else {
+              return false
+            }
+          })
+        }
+      }
+    }
+  )
 
-  </script>
+</script>
 
 </html>
+
+
+
+
+<style scoped>
+  .loginbody {
+    width: 100%;
+    height: 100%;
+    min-width: 1000px;
+    background-image: url('/static/assets/change_infos.jpg');
+    background-size: 100% 100%;
+    background-position: center center;
+    overflow: auto;
+    background-repeat: no-repeat;
+    position: fixed;
+    line-height: 100%;
+    padding-top: 30px;
+  }
+
+  .content-class {
+    width: 80%;
+    height: 800px;
+    margin: 0 auto;
+  }
+
+  .logintext {
+    margin-bottom: 20px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 30px;
+    font-weight: bolder;
+    color: white;
+    text-shadow: 2px 2px 4px #000000;
+  }
+
+  .loginitem {
+    text-align: center;
+    font-size: 15px;
+    font-weight: bolder;
+    color: black;
+  }
+
+  .logindata {
+    width: 400px;
+    height: 300px;
+    transform: translate(-50%);
+    margin-left: 50%;
+  }
+
+  .tool {
+    display: flex;
+    justify-content: space-between;
+    color: #606266;
+  }
+
+  .butt {
+    margin-top: 10px;
+    text-align: center;
+  }
+
+  .shou {
+    cursor: pointer;
+    color: #606266;
+  }
+
+  /*ui*/
+  /* /deep/ .el-form-item__label {
+      font-weight: bolder;
+      font-size: 15px;
+      text-align: left;
+    }
+    
+    /deep/ .el-button {
+      width: 100%;
+      margin-bottom: 10px;
+    
+    } */
+</style>

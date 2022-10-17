@@ -10,6 +10,7 @@ from django.views import View
 from django.core.cache import cache
 from time import strftime
 from message.models import Message
+from django.db.models import Q
 
 # Create your views here.
 # def release_blog_view(request)
@@ -26,7 +27,7 @@ class blog_topic_view(View):
                 'category': topic.category,
                 'created_time': topic.created_time.strftime('%Y-%m-%d %H:%M:%S'),
                 'introduce': topic.introduce,
-                'author': author.username,
+                'author': topic.author_id,
             })
         return JsonResponse({
             'code': 200,
@@ -75,6 +76,7 @@ class blog_topic_view(View):
             'nickname': author.nickname,
             'title': thetopic.title,
             'category': thetopic.category,
+            'limit': thetopic.limit,
             'created_time': thetopic.created_time.strftime('%Y-%m-%d %H:%M:%S'),
             'content': thetopic.content,
             'introduce': thetopic.introduce,
@@ -110,25 +112,16 @@ class blog_topic_view(View):
             return JsonResponse({'code': 200, 'error': '该用户不存在'})
         if not category and not t_id:
             # v1/<username>/topics
-            myusername = request.myusername
-            if myusername == username:
-                topics = Topic.objects.filter(author_id=username)
-            else:
-                topics = Topic.objects.filter(
-                    author_id=username, limit='public')
+            topics = Topic.objects.filter(Q(limit="public")|Q(username=username))
 
             return self.make_topic_res(user, topics)
 
         elif category:
             # 按技术和非技术进行分类
             # v1/<username>/topics?category=tec/no-tec
-            myusername = request.myusername
-            if myusername == username:
-                topics = Topic.objects.filter(
-                    author_id=username, category=category)
-            else:
-                topics = Topic.objects.filter(
-                    author_id=username, limit='public', category=category)
+
+            topics = Topic.objects.filter(
+                Q(limit='public')|Q(username=username), category=category)
             return self.make_topic_res(user, topics)
 
         elif t_id:
@@ -152,16 +145,43 @@ class blog_topic_view(View):
         content_text = json_obj.get('content_text')
         if content_text:
             introduce = content_text[:30]
+        else:
+            introduce = content[:30]
         limit = json_obj.get('limit')
         title = json_obj.get('title')
         category = json_obj.get('category')
-        if not content or not content_text or not limit or not title or not category:
+        if not content or not limit or not title or not category:
             return JsonResponse({'code': 10111, 'error': '某些字段为空！'})
 
         myusername = request.myusername
         # 新建文章，存入数据库
         Topic.objects.create(content=content, limit=limit, title=title,
                              category=category, author_id=myusername, introduce=introduce)
+        # 删除缓存
+        self.delete_cache(request)
+        return JsonResponse({'code': 200})
+
+    @method_decorator(is_blog_self_dec)
+    def put(self, request, username):
+        json_str = request.body
+        json_obj = json.loads(json_str)
+        tid = json_obj.get('t_id')
+        content = json_obj.get('content')
+        content_text = json_obj.get('content_text')
+        if content_text:
+            introduce = content_text[:30]
+        else:
+            introduce = content[:30]
+        limit = json_obj.get('limit')
+        title = json_obj.get('title')
+        category = json_obj.get('category')
+        if not content or not limit or not title or not category or not tid:
+            return JsonResponse({'code': 10111, 'error': '某些字段为空！'})
+
+        myusername = request.myusername
+        # 新建文章，存入数据库
+        Topic.objects.filter(id=tid).update(content=content, limit=limit, title=title,
+                                            category=category, author_id=myusername, introduce=introduce)
         # 删除缓存
         self.delete_cache(request)
         return JsonResponse({'code': 200})

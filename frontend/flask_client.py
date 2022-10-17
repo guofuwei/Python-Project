@@ -82,10 +82,10 @@ def test():
     return send_file('templates/test.html')
 
 
+@app.route('/<username>/topic/release_update/<t_id>')
+def release_update(username, t_id):
+    return send_file('templates/release_update.html')
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=10000, debug=True)
-
-
-@app.route('/<username>/topic/release_update')
-def release_update(username):
-    return send_file('templates/release_update.html')
