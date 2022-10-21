@@ -1,3 +1,14 @@
+'''
+Author: hanshan-server 2625406970@qq.com
+Date: 2022-10-14 09:06:51
+LastEditors: hanshan-server 2625406970@qq.com
+LastEditTime: 2022-10-21 04:58:27
+FilePath: /Python-Project/backend/user/views.py
+Description: 用户的有关处理逻辑
+
+Copyright (c) 2022 by hanshan-server 2625406970@qq.com, All Rights Reserved. 
+'''
+
 import email
 from django.shortcuts import render
 from django.views import View
@@ -14,35 +25,47 @@ from tools.login_check import login_check_dec
 from tools.send_email import send_email
 from .tasks import *
 
-# Create your views here.
-default_sign = '这个人很懒，什么也没写'
-default_info = '这个人很懒，什么也没写'
+default_sign = '这个人很懒，什么也没写'  # 默认用户签名
+default_info = '这个人很懒，什么也没写'  # 默认用户简介
 
 
 @login_check_dec
 def update_avatar_view(request, username):
+    """更新头像
+
+    Args:
+        request (http request): 请求
+        username (string): 用户名
+
+    Returns:
+        json: 以json格式返回
+    """
+    # 排除非法请求
     if request.method != 'POST':
         return JsonResponse({'code': 10109, 'error': '非法请求'})
-    # print(request.FILES)
-    # print(request.FILES.get('avatar'))
-    # print(request.body.name)
-    # return JsonResponse({'code': 2000})
-    avatar = request.FILES.get('avatar')
+    avatar = request.FILES.get('avatar')  # 获取头像
     myuser = request.myuser
     myuser.avatar = avatar
-    myuser.save()
+    myuser.save()  # 保存头像
     return JsonResponse({'code': 200, 'error': ''})
 
 
 @login_check_dec
 def update_password_view(request, username):
+    """更新密码
+
+    Args:
+        request (http request): 请求
+        username (string): 用户名
+
+    Returns:
+        json: 以json格式返回
+    """
     if request.method != 'POST':
         return JsonResponse({'code': 10109, 'error': '非法请求'})
     myuser = request.myuser
     json_str = request.body
-    # print(json_str)
-    # return JsonResponse({'code': 10000})
-    json_obj = json.loads(json_str)
+    json_obj = json.loads(json_str)  # 拿取request body
     password_new = json_obj.get('password_new')
     password_new2 = json_obj.get('password_new2')
     if not password_new or not password_new2:
@@ -52,22 +75,31 @@ def update_password_view(request, username):
     p_m.update(password_new.encode('utf-8'))
     password = p_m.hexdigest()
     myuser.password = password
-    # 保存新密码
-    myuser.save()
+    myuser.save()  # 保存新密码
     return JsonResponse({'code': 200, 'error': ''})
 
 
 def forget_password_view(request):
+    """忘记密码
+
+    Args:
+        request (http request): 请求
+
+    Returns:
+        json: 以json格式返回
+    """
     if request.method != 'POST':
         return JsonResponse({'code': 10109, 'error': '非法请求'})
     json_str = request.body
     json_obj = json.loads(json_str)
     if not json_str:
         return JsonResponse({'code': 202, 'error': '请求中无内容'})
+    # 拿取request body中的各种参数
     email = json_obj.get('email')
     email_code = json_obj.get('email_code')
     password_new = json_obj.get('password_new1')
     password_new2 = json_obj.get('password_new2')
+    # 拿取缓存中的邮件验证码
     cache_key = 'email_code_%s' % email
     cache_code = cache.get(cache_key)
     try:
@@ -92,11 +124,20 @@ def forget_password_view(request):
     password = p_m.hexdigest()
     # 保存新密码
     user.password = password
+    # 保存密码
     user.save()
     return JsonResponse({'code': 200, 'error': ''})
 
 
 def sendSMS_view(request):
+    """发送短信验证码
+
+    Args:
+        request (http request): 请求
+
+    Returns:
+        json: 以json格式返回
+    """
     # 获取手机号和生成验证码
     code = random.randint(100000, 999999)
     json_str = request.body
@@ -111,13 +152,18 @@ def sendSMS_view(request):
     cache.set(cache_key, code, 180)
 
     # 发送验证码
-    # sendsms(phone,code)
     sendsms_celery.delay(phone, code)
 
     return JsonResponse({'code': 200})
 
 
 def sendsms(phone, code):
+    """发送短信验证码
+
+    Args:
+        phone (string): 手机号
+        code (string): 验证码
+    """
     yuntongxin = sms.Yuntongxin()
     ret = yuntongxin.run(phone, code)
 
@@ -146,7 +192,18 @@ def sendmail_view(request):
 
 
 class UserView(View):
+    """关于用户的post,get,put的操作
+    """
+
     def post(self, request):
+        """注册请求
+
+        Args:
+            request (http request): 请求
+
+        Returns:
+            json: 以json格式返回
+        """
         json_string = request.body
         json_obj = json.loads(json_string)
         username = json_obj.get('username')
@@ -167,8 +224,8 @@ class UserView(View):
         if not cache_code:
             return JsonResponse({'code': 201, 'error': '验证码已过期'})
         if not cache_code == int_email:
-            print(cache.get(cache_key))
-            print(int_email)
+            # print(cache.get(cache_key))
+            # print(int_email)
             return JsonResponse({'code': 208, 'error': '验证码不正确'})
         if not username:
             return JsonResponse({'code': 203, 'error': '请求中未提交用户名'})
@@ -179,7 +236,7 @@ class UserView(View):
         if password1 != password2:
             return JsonResponse({'code': 206, 'error': '两次提交的密码不一致'})
         try:
-            UserProfile.objects.get(email=email)
+            UserProfile.objects.get(email=email)  # type: ignore
             return JsonResponse({'code': 207, 'error': '该邮箱已注册'})
         except:
             pass
@@ -194,14 +251,23 @@ class UserView(View):
         p_m.update(password1.encode('utf-8'))
         password = p_m.hexdigest()
 
+        # 新建用户
         UserProfile.objects.create(username=username, nickname=username, email=email,
                                    password=password, sign=default_sign, info=default_info)
         return JsonResponse({'code': 200, 'username': username, 'data': ''})
 
     @method_decorator(login_check_dec)
     def get(self, request, username):
+        """获取用户信息请求
+
+        Args:
+            request (http request): 请求
+            username (string): 用户名
+
+        Returns:
+            json: 以json格式返回
+        """
         # 校验参数
-        # print(request)
         myuser = request.myuser
         try:
             theuser = UserProfile.objects.get(username=username)
@@ -221,6 +287,15 @@ class UserView(View):
 
     @method_decorator(login_check_dec)
     def put(self, request, username):
+        """获取用户信息请求
+
+        Args:
+            request (http request): 请求
+            username (string): 用户名
+
+        Returns:
+            json: 以json格式返回
+        """
         # 校验参数
         if not username:
             return JsonResponse({'code': 10107, 'error': '非法请求'})
