@@ -1,3 +1,14 @@
+'''
+Author: hanshan-macbookair 2625406970@qq.com
+Date: 2022-10-11 12:24:13
+LastEditors: hanshan-macbookair 2625406970@qq.com
+LastEditTime: 2022-10-21 15:09:25
+FilePath: /Python-Project/backend/mytoken/views.py
+Description: 登陆并生成登陆令牌
+
+Copyright (c) 2022 by hanshan-macbookair 2625406970@qq.com, All Rights Reserved. 
+'''
+
 from django.http.response import JsonResponse
 from django.shortcuts import render
 import json
@@ -10,6 +21,13 @@ from django.conf import settings
 
 # Create your views here.
 def login_view(request):
+    """处理登陆事件的逻辑
+    Args:
+        request (http request):  请求
+
+    Returns:
+        json: JsonResponse
+    """
     if not request.method == 'POST':
         return JsonResponse({'code': 10101, 'error': '非法请求'})
     json_str = request.body
@@ -17,8 +35,7 @@ def login_view(request):
     json_obj = json.loads(json_str)
     username = json_obj.get('username')
     password = json_obj.get('password')
-    # print(username)
-    # print(password)
+    # 检查参数
     if not username or not password:
         return JsonResponse({'code': 10102, 'error': '用户名或密码为空!'})
 
@@ -38,6 +55,15 @@ def login_view(request):
 
 
 def make_token(username, expire=settings.JWT_EXPIRE):
+    """利用jwt制作登陆令牌(token)
+
+    Args:
+        username (string): 用户名
+        expire (int, optional): 令牌过期时间
+
+    Returns:
+        bytes: 制作好的令牌
+    """
     key = settings.JWT_KEY
     payload = {'username': username, 'exp': time.time()+expire}
     return jwt.encode(payload=payload, key=key, algorithm='HS256').decode()

@@ -36,6 +36,14 @@ services:
       - myblog-net
     command: bash -c "sleep 3 && python manage.py migrate\
             && python manage.py runserver 0.0.0.0:8000"
+  
+  redis:
+    image: redis
+    container_name: redis
+    networks:
+      - myblog-net
+    command: 
+      redis-server /usr/local/etc/redis/redis.conf"
 
 volumes:
   myblog-data:
