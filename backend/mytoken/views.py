@@ -2,7 +2,7 @@
 Author: hanshan-macbookair 2625406970@qq.com
 Date: 2022-10-11 12:24:13
 LastEditors: hanshan-macbookair 2625406970@qq.com
-LastEditTime: 2022-10-21 15:09:25
+LastEditTime: 2022-11-08 15:30:25
 FilePath: /Python-Project/backend/mytoken/views.py
 Description: 登陆并生成登陆令牌
 
@@ -19,7 +19,6 @@ import time
 from django.conf import settings
 
 
-# Create your views here.
 def login_view(request):
     """处理登陆事件的逻辑
     Args:

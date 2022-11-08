@@ -35,7 +35,7 @@ services:
     networks:
       - myblog-net
     command: bash -c "sleep 3 && python manage.py migrate\
-            && python manage.py runserver 0.0.0.0:8000"
+            && python manage.py runserver 0.0.0.0:9090"
   
   redis:
     image: redis
@@ -43,7 +43,7 @@ services:
     networks:
       - myblog-net
     command: 
-      redis-server /usr/local/etc/redis/redis.conf"
+      redis-server /usr/local/etc/redis/redis.conf
 
 volumes:
   myblog-data:

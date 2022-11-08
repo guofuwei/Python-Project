@@ -1,8 +1,8 @@
 '''
 Author: hanshan-server 2625406970@qq.com
 Date: 2022-10-14 09:06:51
-LastEditors: hanshan-server 2625406970@qq.com
-LastEditTime: 2022-10-21 04:58:27
+LastEditors: hanshan-macbookair 2625406970@qq.com
+LastEditTime: 2022-11-08 15:32:34
 FilePath: /Python-Project/backend/user/views.py
 Description: 用户的有关处理逻辑
 
@@ -127,45 +127,6 @@ def forget_password_view(request):
     # 保存密码
     user.save()
     return JsonResponse({'code': 200, 'error': ''})
-
-
-def sendSMS_view(request):
-    """发送短信验证码
-
-    Args:
-        request (http request): 请求
-
-    Returns:
-        json: 以json格式返回
-    """
-    # 获取手机号和生成验证码
-    code = random.randint(100000, 999999)
-    json_str = request.body
-    json_obj = json.loads(json_str)
-    phone = json_obj.get('phone')
-
-    # 储存验证码
-    cache_key = 'sms_%s' % phone
-    old_key = cache.get(cache_key)
-    if old_key:
-        return JsonResponse({'code': 10100, 'error': '短信业务繁忙，请稍后再试'})
-    cache.set(cache_key, code, 180)
-
-    # 发送验证码
-    sendsms_celery.delay(phone, code)
-
-    return JsonResponse({'code': 200})
-
-
-def sendsms(phone, code):
-    """发送短信验证码
-
-    Args:
-        phone (string): 手机号
-        code (string): 验证码
-    """
-    yuntongxin = sms.Yuntongxin()
-    ret = yuntongxin.run(phone, code)
 
 
 def sendmail_view(request):
