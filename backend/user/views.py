@@ -2,7 +2,7 @@
 Author: hanshan-server 2625406970@qq.com
 Date: 2022-10-14 09:06:51
 LastEditors: hanshan-macbookair 2625406970@qq.com
-LastEditTime: 2022-11-08 15:32:34
+LastEditTime: 2022-11-11 21:20:06
 FilePath: /Python-Project/backend/user/views.py
 Description: 用户的有关处理逻辑
 
@@ -14,10 +14,8 @@ from django.shortcuts import render
 from django.views import View
 import json
 from django.http import JsonResponse
-from pydantic import ConstrainedFloat, Json
 from .models import *
 import hashlib
-from tools import sms
 import random
 from django.core.cache import cache
 from django.utils.decorators import method_decorator
